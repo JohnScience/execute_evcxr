@@ -17,7 +17,8 @@ pub(crate) struct ParsedEvcxr {
 
 impl From<EvcxrSource> for ParsedEvcxr {
     fn from(evcxr_src: EvcxrSource) -> Self {
-        ParsedEvcxr::new(evcxr_src, EvcxrSource::parse_dependencies)
+        // ParsedEvcxr::new(evcxr_src, EvcxrSource::parse_dependencies)
+        unimplemented!()
     }
 }
 
