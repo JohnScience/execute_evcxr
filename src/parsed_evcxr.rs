@@ -1,5 +1,3 @@
-use ouroboros::self_referencing;
-
 use std::{
     path::Path,
     // fs::{File, write},
@@ -7,22 +5,12 @@ use std::{
 
 use crate::EvcxrSource;
 
-#[self_referencing]
-pub(crate) struct ParsedEvcxr {
-    src: EvcxrSource,
-    #[borrows(src)]
-    #[covariant]
-    dependencies: Vec<&'this str>,
+pub(crate) struct ParsedEvcxr<'a> {
+    pub(crate) prefixed_dependencies: Vec<&'a str>,
+    pub(crate) pure_rust: &'a str,
 }
 
-impl From<EvcxrSource> for ParsedEvcxr {
-    fn from(evcxr_src: EvcxrSource) -> Self {
-        // ParsedEvcxr::new(evcxr_src, EvcxrSource::parse_dependencies)
-        unimplemented!()
-    }
-}
-
-impl ParsedEvcxr {
+impl<'a> ParsedEvcxr<'a> {
     pub(crate) fn create_project(&self, dir_path: &Path) -> std::io::Result<()> {
         // write(dir_path.join("main.rs"), );
         // Ok(())
