@@ -1,10 +1,10 @@
-use proc_macro::TokenStream;
-use core::{
-    iter::{Map, Enumerate, Filter},
-    str::Lines,
+use std::{
+    ops::Deref,
+    str::{from_utf8_unchecked, FromStr}
 };
-use std::ops::Deref;
 use crate::ParsedEvcxr;
+use syn::{parse2, parse::{Parse, Parser}};
+use proc_macro2::TokenStream as TokenStream2;
 
 pub(crate) struct EvcxrSource(pub String);
 
@@ -14,21 +14,8 @@ impl From<String> for EvcxrSource {
     }
 }
 
-impl From<TokenStream> for EvcxrSource {
-    fn from(ts: TokenStream) -> Self {
-        let s = ts.to_string();
-        EvcxrSource(s)
-    }
-}
-
-impl Into<String> for EvcxrSource {
-    fn into(self) -> String {
-        self.0
-    }
-}
-
 impl EvcxrSource {
-    pub(crate) fn parse<'a>(&'a self) -> ParsedEvcxr<'a> {
+    pub(crate) fn parse<'a>(&'a self) -> syn::Result<ParsedEvcxr<'a>> {
         let mut prefixed_dependencies = Vec::<&str>::with_capacity(255);
         for dep in self.0.lines()
             .map(|line| line.trim())
@@ -49,9 +36,16 @@ impl EvcxrSource {
                 debug_assert!(src_to_line_offset >= 0);
                 let pure_rust_ptr = unsafe { src_ptr.offset(src_to_line_offset + line_len as isize) };
                 let pure_rust_len = src_len - src_to_line_offset as usize - line_len;
-                unsafe { std::str::from_utf8_unchecked(std::slice::from_raw_parts(pure_rust_ptr, pure_rust_len)) }
+                unsafe { from_utf8_unchecked(std::slice::from_raw_parts(pure_rust_ptr, pure_rust_len)) }
+                    .trim()
             }
         };
-        ParsedEvcxr { prefixed_dependencies, pure_rust }
+        let chars: Vec<char> = pure_rust.chars().collect();
+        println!("{:?}", chars);
+        println!("{:?}", pure_rust.as_bytes());
+        let pure_rust_ts = TokenStream2::from_str(pure_rust)
+            .map_err(|e| syn::Error::new_spanned(pure_rust, "Lexing error"))?;
+        let pure_rust = Parser::parse2(syn::File::parse, pure_rust_ts)?;
+        Ok(ParsedEvcxr { prefixed_dependencies, pure_rust })
     }
 }
