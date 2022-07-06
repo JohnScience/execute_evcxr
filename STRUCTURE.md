@@ -4,7 +4,7 @@ This a [Rust] project and it follows the [conventional package layout].
 
 <pre><code>
 execute_evcxr
-│   STRUCTURE.md - you're here; the project structure
+│   STRUCTURE.md - project structure (package layout); semi-conventional. You're here
 │   <a href="https://en.wikipedia.org/wiki/README">README.md</a> - repository description; specified not by Rust package layout conventions but by <a href="https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes">GitHub conventions</a>
 │   <a href="https://doc.rust-lang.org/cargo/guide/cargo-toml-vs-cargo-lock.html">Cargo.lock</a> - machine-generated file containing the exact information about dependencies
 │   <a href="https://doc.rust-lang.org/cargo/reference/manifest.html">Cargo.toml</a> - the manifest
