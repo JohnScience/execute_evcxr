@@ -13,7 +13,7 @@ execute_evcxr
 :   │   lib.rs - the default <a href="https://teamtreehouse.com/community/what-exactly-is-a-library-in-programming">library</a> file
 :   │   ... - the remaining files will be described separately
 :
-.... target/ - the build directory that appears after either directory or indirectly building the package with Cargo
+.... target/ - the build directory that appears after either directly or indirectly building the package with Cargo
     :   ... - the contents of the build directory are machine-dependent and rarely should be of interest to the developer
 </code></pre>
 
