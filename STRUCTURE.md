@@ -17,8 +17,6 @@ execute_evcxr
     :   ... - the contents of the build directory are machine-dependent and rarely should be of interest to the developer
 </code></pre>
 
-Last updated: 7/6/2022.
-
 *Note: the links in the directory tree above lead to explanations of the purpose of each file conventionally and not for the project in question*
 
 # Source code overview
