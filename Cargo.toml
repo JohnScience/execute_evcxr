@@ -10,3 +10,4 @@ syn = { version = "1.0.98", features = ["full", "extra-traits", "parsing", "prin
 # the version of proc-macro2 is unspecified because syn is internally using proc-macro2
 # and the version of this crate is supposed to match the one used by syn
 proc-macro2 = { version = "*", features = ["span-locations"] }
+quote = "*"

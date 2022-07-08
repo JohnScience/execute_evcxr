@@ -1,11 +1,10 @@
-use std::io::Write;
-
 mod evcxr_source;
 mod scriptlike_rust;
 pub(crate) mod parsed_evcxr;
 
-use parsed_evcxr::ParsedEvcxr;
 pub(crate) use evcxr_source::EvcxrSource;
+pub(crate) use scriptlike_rust::ScriptlikeRust;
+use parsed_evcxr::ParsedEvcxr;
 
 pub fn execute_evcxr(s: String) {
     let src = EvcxrSource::from(s);
@@ -17,8 +16,5 @@ pub fn execute_evcxr(s: String) {
             return;
         }
     };
-    let mut file = std::fs::File::create("output.txt").unwrap();
-    //file.write_fmt(format_args!("{}", src.0)).unwrap();
-    //file.write_fmt(format_args!("{:?}", parsed.prefixed_dependencies)).unwrap();
-    file.write_fmt(format_args!("{:#?}", parsed.pure_rust.items)).unwrap();
+    parsed.create_project(std::env::current_dir().unwrap().join("output").as_path()).unwrap();
 }

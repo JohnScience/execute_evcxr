@@ -1,10 +1,10 @@
 use std::{
     ops::Deref,
-    str::{from_utf8_unchecked, FromStr}
+    str::from_utf8_unchecked,
 };
-use crate::ParsedEvcxr;
-use syn::{parse2, parse::{Parse, Parser}};
-use proc_macro2::TokenStream as TokenStream2;
+use syn::parse_str;
+
+use crate::{ScriptlikeRust,ParsedEvcxr};
 
 pub(crate) struct EvcxrSource(pub String);
 
@@ -23,7 +23,7 @@ impl EvcxrSource {
         {
             prefixed_dependencies.push(dep);
         };
-        let pure_rust = match prefixed_dependencies.last().map(Deref::deref) {
+        let scriptlike_rust = match prefixed_dependencies.last().map(Deref::deref) {
             None => "",
             Some(line) => {
                 let src_ptr = self.0.as_ptr();
@@ -34,18 +34,13 @@ impl EvcxrSource {
                 // https://doc.rust-lang.org/stable/std/primitive.pointer.html#method.sub_ptr
                 let src_to_line_offset = unsafe { line_ptr.offset_from(src_ptr) };
                 debug_assert!(src_to_line_offset >= 0);
-                let pure_rust_ptr = unsafe { src_ptr.offset(src_to_line_offset + line_len as isize) };
-                let pure_rust_len = src_len - src_to_line_offset as usize - line_len;
-                unsafe { from_utf8_unchecked(std::slice::from_raw_parts(pure_rust_ptr, pure_rust_len)) }
+                let scriptlike_rust_ptr = unsafe { src_ptr.offset(src_to_line_offset + line_len as isize) };
+                let scriptlike_rust_len = src_len - src_to_line_offset as usize - line_len;
+                unsafe { from_utf8_unchecked(std::slice::from_raw_parts(scriptlike_rust_ptr, scriptlike_rust_len)) }
                     .trim()
             }
         };
-        let chars: Vec<char> = pure_rust.chars().collect();
-        println!("{:?}", chars);
-        println!("{:?}", pure_rust.as_bytes());
-        let pure_rust_ts = TokenStream2::from_str(pure_rust)
-            .map_err(|e| syn::Error::new_spanned(pure_rust, "Lexing error"))?;
-        let pure_rust = Parser::parse2(syn::File::parse, pure_rust_ts)?;
-        Ok(ParsedEvcxr { prefixed_dependencies, pure_rust })
+        let scriptlike_rust: ScriptlikeRust = parse_str(scriptlike_rust)?;
+        Ok(ParsedEvcxr { prefixed_dependencies, scriptlike_rust })
     }
 }
