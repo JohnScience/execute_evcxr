@@ -1,6 +1,7 @@
 use std::{
     ops::Deref,
     str::from_utf8_unchecked,
+    hash::{Hash, Hasher},
 };
 use syn::parse_str;
 
@@ -16,6 +17,10 @@ impl From<String> for EvcxrSource {
 
 impl EvcxrSource {
     pub(crate) fn parse<'a>(&'a self) -> syn::Result<ParsedEvcxr<'a>> {
+        let mut hasher = std::collections::hash_map::DefaultHasher::new();
+        self.0.hash(&mut hasher);
+        let hash = hasher.finish();
+        
         let mut prefixed_dependencies = Vec::<&str>::with_capacity(255);
         for dep in self.0.lines()
             .map(|line| line.trim())
@@ -24,7 +29,7 @@ impl EvcxrSource {
             prefixed_dependencies.push(dep);
         };
         let scriptlike_rust = match prefixed_dependencies.last().map(Deref::deref) {
-            None => "",
+            None => self.0.as_str(),
             Some(line) => {
                 let src_ptr = self.0.as_ptr();
                 let src_len = self.0.len();
@@ -41,6 +46,6 @@ impl EvcxrSource {
             }
         };
         let scriptlike_rust: ScriptlikeRust = parse_str(scriptlike_rust)?;
-        Ok(ParsedEvcxr { prefixed_dependencies, scriptlike_rust })
+        Ok(ParsedEvcxr { prefixed_dependencies, scriptlike_rust, hash })
     }
 }
