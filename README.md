@@ -8,7 +8,7 @@ to [Jupyter](https://en.wikipedia.org/wiki/Project_Jupyter) [kernel](https://doc
 
 ## Example of [`evcxr`]-flavored Rust
 
-```rust,no_run
+```rust,ignore
 :dep image = "0.23"
 :dep evcxr_image = "1.1"
 // In a pure Rust project, the dependencies above would be specified in Cargo.toml
@@ -21,6 +21,83 @@ image::ImageBuffer::from_fn(256, 256, |x, y| {
         image::Rgb([0, 0, 0])
     }
 })
+```
+
+# Example for [Jupyter Notebook] with [`evcxr` kernel]
+
+```rust,ignore
+:dep execute_evcxr = { version = "0.1.0" }
+
+use execute_evcxr::{execute_evcxr, Config};
+
+// This way it's possible to specify the non-default values
+let config = Config { verbose: false, ..Default::default() };
+execute_evcxr(r#"
+:dep nalgebra = "0.31.0"
+:dep nalgebra_latex = { version = "0.1.5", features = ["lin_sys", "evcxr"] }
+ 
+use nalgebra::{matrix, Const};
+use nalgebra_latex::{
+    lin_sys::{
+        LinSys,
+        unknowns::SingleLetterBoldfaceVecOfUnknowns,
+        numbering::Numbering,
+        fmt::CasesLinSysFormatter,
+    },
+    fmt::EvcxrOutputFormatter,
+};
+use std::io::{stdout, Write};
+
+let mut s = String::new();
+let m = matrix!(
+    1,2,3;
+    4,5,6;
+    7,8,9;
+);
+let vec_of_unknowns = SingleLetterBoldfaceVecOfUnknowns::<_,{Numbering::OneBased}>::new('x', Const::<3>);
+let ls = LinSys::new(m, vec_of_unknowns);
+CasesLinSysFormatter::write_evcxr_output(&mut s, &ls).unwrap();
+stdout().write_all(s.as_bytes()).unwrap();
+"#, config);
+```
+
+# Example for Rust project
+
+```rust
+extern crate execute_evcxr;
+
+use execute_evcxr::{execute_evcxr, Config};
+
+fn main() {
+    let config = Config { ..Config::default() };
+    execute_evcxr(r#"
+:dep nalgebra = "0.31.0"
+:dep nalgebra_latex = { version = "0.1.5", features = ["lin_sys", "evcxr"] }
+
+use nalgebra::{matrix, Const};
+use nalgebra_latex::{
+    lin_sys::{
+        LinSys,
+        unknowns::SingleLetterBoldfaceVecOfUnknowns,
+        numbering::Numbering,
+        fmt::CasesLinSysFormatter,
+    },
+    fmt::EvcxrOutputFormatter,
+};
+use std::io::{stdout, Write};
+
+let mut s = String::new();
+let m = matrix!(
+    1,2,3;
+    4,5,6;
+    7,8,9;
+);
+let vec_of_unknowns = SingleLetterBoldfaceVecOfUnknowns::<_,{Numbering::OneBased}>::new('x', Const::<3>);
+let ls = LinSys::new(m, vec_of_unknowns);
+CasesLinSysFormatter::write_evcxr_output(&mut s, &ls).unwrap();
+stdout().write_all(s.as_bytes()).unwrap();
+"#, config);
+}
 ```
 
 At the moment of writing, the original [`evcxr` kernel] supports a lot but not all <sup><a href="https://github.com/google/evcxr/issues/165">1</a></sup> features of Rust. This crate has been born as a **temporary** solution to the problem.
@@ -41,6 +118,8 @@ The syntax supported by [`evcxr` kernel], as opposed to pure Rust, is implementa
 
 * Due to the last three limitations above, the developer might need to annotate every macro invocation that eventually expands to ["items"](https://doc.rust-lang.org/reference/items.html) using `#[expands_only_to_items]` attribute. Otherwise, they will be placed inside main function. Luckily, the most common macros do **not** require the attribute and in many cases even if the macros do expands to ["items"](https://doc.rust-lang.org/reference/items.html) in the `main()`, the binary crate can still work as expected.
 
+* Execution speed of the scripts is bounded to building them anew, including downloading dependencies from the internet. It can be a wise idea to set up caching. The library author hasn't faced the need for caching, yet.
+
 # For library developers
 
 This is a [README](https://en.wikipedia.org/wiki/README) for library users. There's a separate [DEV-README.md](https://github.com/JohnScience/execute_evcxr/blob/main/DEV-README.md) with information that can be relevant only to library developers.
@@ -48,6 +127,7 @@ This is a [README](https://en.wikipedia.org/wiki/README) for library users. Ther
 [`execute_evcxr`]: https://crates.io/crates/execute_evcxr
 [`evcxr`]: https://github.com/google/evcxr/blob/main/evcxr_jupyter/samples/evcxr_jupyter_tour.ipynb
 [`evcxr` kernel]: https://github.com/google/evcxr/tree/main/evcxr_jupyter
+[Jupyter Notebook]: https://en.wikipedia.org/wiki/Project_Jupyter#Jupyter_Notebook
 
 # License
 

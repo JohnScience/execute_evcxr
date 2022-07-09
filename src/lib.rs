@@ -1,3 +1,5 @@
+#![doc = include_str!("../README.md")]
+
 pub(crate) mod binary_crate;
 mod evcxr_source;
 pub(crate) mod parsed_evcxr;
