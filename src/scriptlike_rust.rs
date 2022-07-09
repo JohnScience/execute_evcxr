@@ -1,25 +1,23 @@
 use std::marker::PhantomData;
 
-use syn::{
-    parse::{
-        Parse, ParseStream,
-        discouraged::Speculative
-    },
-    Item, Stmt, ItemMacro,
-};
 use quote::ToTokens;
+use syn::{
+    parse::{discouraged::Speculative, Parse, ParseStream},
+    Item, ItemMacro, Stmt,
+};
 
 // Ideally, the struct must store string slices into the source code.
 // However, syn does not offer such parsing by default.
-pub(crate) struct ScriptlikeRust<'a>
-{
+pub(crate) struct ScriptlikeRust<'a> {
     pub(crate) items: Vec<Item>,
     pub(crate) statements: Vec<Stmt>,
     pub(crate) phantom: PhantomData<&'a ()>,
 }
 
 fn expands_only_to_items(i: &ItemMacro) -> bool {
-    i.attrs.iter().any(|attr| attr.path.is_ident("expands_only_to_items"))
+    i.attrs
+        .iter()
+        .any(|attr| attr.path.is_ident("expands_only_to_items"))
 }
 
 impl<'a> Parse for ScriptlikeRust<'a> {
@@ -32,18 +30,26 @@ impl<'a> Parse for ScriptlikeRust<'a> {
         while !input.is_empty() {
             let ahead = input.fork();
             match input.parse::<Item>().ok() {
-                Some(item) => {
-                    match item {
-                        Item::Macro(i) if !expands_only_to_items(&i) => {
-                            statements.push(Stmt::Item(Item::Macro(i)))
-                        },
-                        _ => items.push(item)
+                Some(item) => match item {
+                    Item::Macro(mut i) => {
+                        match i
+                            .attrs
+                            .iter()
+                            .position(|attr| attr.path.is_ident("expands_only_to_items"))
+                        {
+                            Some(idx) => {
+                                i.attrs.swap_remove(idx);
+                                items.push(Item::Macro(i));
+                            }
+                            None => statements.push(Stmt::Item(Item::Macro(i))),
+                        }
                     }
+                    _ => items.push(item),
                 },
                 None => {
                     input.advance_to(&ahead);
-                    break
-                },
+                    break;
+                }
             }
         }
         while !input.is_empty() {
@@ -52,14 +58,18 @@ impl<'a> Parse for ScriptlikeRust<'a> {
                 Err(e) => return Err(e),
             }
         }
-        Ok(ScriptlikeRust { items, statements, phantom: PhantomData })
+        Ok(ScriptlikeRust {
+            items,
+            statements,
+            phantom: PhantomData,
+        })
     }
 }
 
 impl<'a> ScriptlikeRust<'a> {
     pub(crate) fn write_as_main_rs<W>(&self, dest: &mut W) -> std::io::Result<()>
     where
-        W: std::io::Write
+        W: std::io::Write,
     {
         for item in self.items.iter() {
             match item {
@@ -82,7 +92,7 @@ impl<'a> ScriptlikeRust<'a> {
                 Item::Verbatim(_i) => writeln!(dest, "/* Item::Verbatim */"),
                 // when the item kind is unknown, it is necessary to check
                 // https://docs.rs/syn/latest/syn/enum.Item.html
-                _ => writeln!(dest, "/* unknown item */")
+                _ => writeln!(dest, "/* unknown item */"),
             }?;
             writeln!(dest, "{}", item.into_token_stream())?;
         }

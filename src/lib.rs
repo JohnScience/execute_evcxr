@@ -1,12 +1,12 @@
-mod evcxr_source;
-mod scriptlike_rust;
-pub(crate) mod parsed_evcxr;
 pub(crate) mod binary_crate;
+mod evcxr_source;
+pub(crate) mod parsed_evcxr;
+mod scriptlike_rust;
 
-pub(crate) use evcxr_source::EvcxrSource;
-pub(crate) use scriptlike_rust::ScriptlikeRust;
-use parsed_evcxr::ParsedEvcxr;
 pub(crate) use binary_crate::BinaryCrate;
+pub(crate) use evcxr_source::EvcxrSource;
+use parsed_evcxr::ParsedEvcxr;
+pub(crate) use scriptlike_rust::ScriptlikeRust;
 
 pub fn execute_evcxr(s: String) {
     let src = EvcxrSource::from(s);
@@ -20,6 +20,8 @@ pub fn execute_evcxr(s: String) {
     };
     match parsed_evcxr.execute_via_binary_crate::</*KEEP_CRATE*/false>() {
         Ok(_) => (),
-        Err(e) => { eprintln!("{:?}", e); }
+        Err(e) => {
+            eprintln!("{:?}", e);
+        }
     };
 }
