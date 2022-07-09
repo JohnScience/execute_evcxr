@@ -3,7 +3,7 @@ use std::marker::PhantomData;
 use quote::ToTokens;
 use syn::{
     parse::{discouraged::Speculative, Parse, ParseStream},
-    Item, ItemMacro, Stmt,
+    Item, Stmt,
 };
 
 // Ideally, the struct must store string slices into the source code.
@@ -14,12 +14,6 @@ pub(crate) struct ScriptlikeRust<'a> {
     pub(crate) phantom: PhantomData<&'a ()>,
 }
 
-fn expands_only_to_items(i: &ItemMacro) -> bool {
-    i.attrs
-        .iter()
-        .any(|attr| attr.path.is_ident("expands_only_to_items"))
-}
-
 impl<'a> Parse for ScriptlikeRust<'a> {
     // The struct must differentiate two kinds of Item::Macro,
     // those whose expansion contains only items and those that contain statements
@@ -28,7 +22,7 @@ impl<'a> Parse for ScriptlikeRust<'a> {
         let mut items = Vec::new();
         let mut statements = Vec::new();
         while !input.is_empty() {
-            let ahead = input.fork();
+            let cursor_snapshot = input.fork();
             match input.parse::<Item>().ok() {
                 Some(item) => match item {
                     Item::Macro(mut i) => {
@@ -47,7 +41,7 @@ impl<'a> Parse for ScriptlikeRust<'a> {
                     _ => items.push(item),
                 },
                 None => {
-                    input.advance_to(&ahead);
+                    input.advance_to(&cursor_snapshot);
                     break;
                 }
             }
