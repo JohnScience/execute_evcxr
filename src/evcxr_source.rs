@@ -16,7 +16,7 @@ impl From<String> for EvcxrSource {
 }
 
 impl EvcxrSource {
-    pub(crate) fn parse<'a>(&'a self) -> syn::Result<ParsedEvcxr<'a>> {
+    pub(crate) fn parse(&self) -> syn::Result<ParsedEvcxr> {
         let mut hasher = std::collections::hash_map::DefaultHasher::new();
         self.0.hash(&mut hasher);
         let hash = hasher.finish();
