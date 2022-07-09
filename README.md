@@ -41,6 +41,10 @@ The syntax supported by [`evcxr` kernel], as opposed to pure Rust, is implementa
 
 * Due to the last three limitations above, the developer might need to annotate every macro invocation that eventually expands to ["items"](https://doc.rust-lang.org/reference/items.html) using `#[expands_only_to_items]` attribute. Otherwise, they will be placed inside main function. Luckily, the most common macros do **not** require the attribute and in many cases even if the macros do expands to ["items"](https://doc.rust-lang.org/reference/items.html) in the `main()`, the binary crate can still work as expected.
 
+# For library developers
+
+This is a [README](https://en.wikipedia.org/wiki/README) for library users. There's a separate [DEV-README.md](https://github.com/JohnScience/execute_evcxr/blob/main/DEV-README.md) with information that can be relevant only to library developers.
+
 [`execute_evcxr`]: https://crates.io/crates/execute_evcxr
 [`evcxr`]: https://github.com/google/evcxr/blob/main/evcxr_jupyter/samples/evcxr_jupyter_tour.ipynb
 [`evcxr` kernel]: https://github.com/google/evcxr/tree/main/evcxr_jupyter
