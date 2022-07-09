@@ -37,7 +37,7 @@ The syntax supported by [`evcxr` kernel], as opposed to pure Rust, is implementa
 
 * Because [`execute_evcxr`] is a **temporary** solution, it does not try to memoize which macros were defined in the script and to which kinds of syntactic entities it would expand. *This fact will become important further in the text.*
 
-* [`execute_evcxr`] works by parsing [`evcxr`]-flavored Rust, building a binary crate from it in the temporary dir, executing the binary crate, and cleaning up. Therefore, it must know which syntactic entities (or, more precisely, ["statements"](https://doc.rust-lang.org/reference/statements.html)) should go inside the `main()` function. *This fact will become important further in the text.*
+* [`execute_evcxr`] works by parsing [`evcxr`]-flavored Rust, building a [binary crate](https://doc.rust-lang.org/book/ch07-01-packages-and-crates.html#:~:text=a%20library%20crate.-,Binary%20crates,-are%20programs%20you) from it in the temporary dir, executing the binary crate, and cleaning up. Therefore, it must know which syntactic entities (or, more precisely, ["statements"](https://doc.rust-lang.org/reference/statements.html)) should go inside the `main()` function. *This fact will become important further in the text.*
 
 * Due to the last three limitations above, the developer might need to annotate every macro invocation that eventually expands to ["items"](https://doc.rust-lang.org/reference/items.html) using `#[expands_only_to_items]` attribute. Otherwise, they will be placed inside main function. Luckily, the most common macros do **not** require the attribute and in many cases even if the macros do expands to ["items"](https://doc.rust-lang.org/reference/items.html) in the `main()`, the binary crate can still work as expected.
 
