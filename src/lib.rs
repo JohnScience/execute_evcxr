@@ -8,7 +8,7 @@ pub(crate) use evcxr_source::EvcxrSource;
 use parsed_evcxr::ParsedEvcxr;
 pub(crate) use scriptlike_rust::ScriptlikeRust;
 
-pub fn execute_evcxr(s: String) {
+pub fn execute_evcxr<S: AsRef<str>>(s: S) {
     let src = EvcxrSource::from(s);
     let parsed_evcxr = match src.parse() {
         Ok(parsed) => parsed,

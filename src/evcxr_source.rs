@@ -7,23 +7,32 @@ use syn::parse_str;
 
 use crate::{ParsedEvcxr, ScriptlikeRust};
 
-pub(crate) struct EvcxrSource(pub String);
+pub(crate) struct EvcxrSource<S>(pub S)
+where
+    S: AsRef<str>;
 
-impl From<String> for EvcxrSource {
-    fn from(s: String) -> Self {
+impl<'a,S> From<S> for EvcxrSource<S>
+where
+    S: AsRef<str>
+{
+    fn from(s: S) -> Self {
         EvcxrSource(s)
     }
 }
 
-impl EvcxrSource {
+impl<'a, S> EvcxrSource<S>
+where
+    S: AsRef<str>
+{
     pub(crate) fn parse(&self) -> syn::Result<ParsedEvcxr> {
         let mut hasher = std::collections::hash_map::DefaultHasher::new();
-        self.0.hash(&mut hasher);
+        self.0.as_ref().hash(&mut hasher);
         let hash = hasher.finish();
 
         let mut prefixed_dependencies = Vec::<&str>::with_capacity(255);
         for dep in self
             .0
+            .as_ref()
             .lines()
             .map(|line| line.trim())
             .filter(|line| line.starts_with(":dep"))
@@ -31,10 +40,10 @@ impl EvcxrSource {
             prefixed_dependencies.push(dep);
         }
         let scriptlike_rust = match prefixed_dependencies.last().map(Deref::deref) {
-            None => self.0.as_str(),
+            None => self.0.as_ref(),
             Some(line) => {
-                let src_ptr = self.0.as_ptr();
-                let src_len = self.0.len();
+                let src_ptr = self.0.as_ref().as_ptr();
+                let src_len = self.0.as_ref().len();
                 let line_ptr = line.as_ptr();
                 let line_len = line.len();
                 // TODO: use sub_ptr when available
