@@ -64,6 +64,7 @@ impl<'a> ParsedEvcxr<'a> {
 
         let mut cmd = std::process::Command::new("cargo");
         cmd.arg("run");
+        cmd.arg("-q");
         cmd.current_dir(&binary_crate.path);
 
         cmd.status()?;
