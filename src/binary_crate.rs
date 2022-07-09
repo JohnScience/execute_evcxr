@@ -1,12 +1,13 @@
 use std::path::Path;
 
-pub(crate) struct BinaryCrate<'a, const PERMANENT: bool> {
+pub(crate) struct BinaryCrate<'a> {
     pub(crate) path: &'a Path,
+    pub(crate) is_permanent: bool,
 }
 
-impl<'a, const PERMANENT: bool> Drop for BinaryCrate<'a, PERMANENT> {
+impl<'a> Drop for BinaryCrate<'a> {
     fn drop(&mut self) {
-        if !PERMANENT {
+        if !self.is_permanent {
             std::fs::remove_dir_all(self.path).unwrap();
         }
     }

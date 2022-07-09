@@ -4,7 +4,7 @@ use std::{
     path::Path,
 };
 
-use crate::{BinaryCrate, ScriptlikeRust};
+use crate::{BinaryCrate, ScriptlikeRust, Config};
 
 const MANIFEST_CONTENTS_START: &str = r#"[package]
 name = "anonymous"
@@ -36,10 +36,11 @@ impl<'a> ParsedEvcxr<'a> {
         Ok(())
     }
 
-    pub(crate) fn create_binary_crate<'b, const PERMANENT: bool>(
+    pub(crate) fn create_binary_crate<'b>(
         &self,
         dir_path: &'b Path,
-    ) -> std::io::Result<BinaryCrate<'b, PERMANENT>> {
+        config: &Config,
+    ) -> std::io::Result<BinaryCrate<'b>> {
         // if the directories exist, nothing will happen
         create_dir_all(dir_path.join("src"))?;
         match File::create(dir_path.join("Cargo.toml")) {
@@ -53,18 +54,18 @@ impl<'a> ParsedEvcxr<'a> {
             Ok(mut main_rs) => self.scriptlike_rust.write_as_main_rs(&mut main_rs)?,
             Err(e) => return Err(e),
         };
-        Ok(BinaryCrate { path: dir_path })
+        Ok(BinaryCrate { path: dir_path, is_permanent: config.keep_binary_crate })
     }
 
-    pub(crate) fn execute_via_binary_crate<const KEEP_CRATE: bool>(&self) -> std::io::Result<()> {
+    pub(crate) fn execute_via_binary_crate(&self, config: &Config) -> std::io::Result<()> {
         let binary_crate_root = std::env::temp_dir()
             .join("execute_evcxr")
             .join(self.hash.to_string());
-        let binary_crate = self.create_binary_crate::<KEEP_CRATE>(&binary_crate_root)?;
+        let binary_crate = self.create_binary_crate(&binary_crate_root, config)?;
 
         let mut cmd = std::process::Command::new("cargo");
         cmd.arg("run");
-        cmd.arg("-q");
+        if !config.verbose { cmd.arg("-q"); };
         cmd.current_dir(&binary_crate.path);
 
         cmd.status()?;
