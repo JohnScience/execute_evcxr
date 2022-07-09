@@ -11,7 +11,7 @@ to [Jupyter](https://en.wikipedia.org/wiki/Project_Jupyter) [kernel](https://doc
 ```rust,no_run
 :dep image = "0.23"
 :dep evcxr_image = "1.1"
-// In pure Rust project, the dependencies above would be specified in Cargo.toml
+// In a pure Rust project, the dependencies above would be specified in Cargo.toml
 use evcxr_image::ImageDisplay;
 
 image::ImageBuffer::from_fn(256, 256, |x, y| {
