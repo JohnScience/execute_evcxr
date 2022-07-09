@@ -48,3 +48,18 @@ This is a [README](https://en.wikipedia.org/wiki/README) for library users. Ther
 [`execute_evcxr`]: https://crates.io/crates/execute_evcxr
 [`evcxr`]: https://github.com/google/evcxr/blob/main/evcxr_jupyter/samples/evcxr_jupyter_tour.ipynb
 [`evcxr` kernel]: https://github.com/google/evcxr/tree/main/evcxr_jupyter
+
+# License
+
+<sup>
+Licensed under either of <a href="LICENSE-APACHE">Apache License, Version
+2.0</a> or <a href="LICENSE-MIT">MIT license</a> at your option.
+</sup>
+
+<br>
+
+<sub>
+Unless you explicitly state otherwise, any contribution intentionally submitted
+for inclusion in this crate by you, as defined in the Apache-2.0 license, shall
+be dual licensed as above, without any additional terms or conditions.
+</sub>
