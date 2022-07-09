@@ -26,7 +26,7 @@ image::ImageBuffer::from_fn(256, 256, |x, y| {
 # Example for [Jupyter Notebook] with [`evcxr` kernel]
 
 ```rust,ignore
-:dep execute_evcxr = { version = "0.1.0" }
+:dep execute_evcxr = { version = "0.1.2" }
 
 use execute_evcxr::{execute_evcxr, Config};
 
@@ -34,7 +34,7 @@ use execute_evcxr::{execute_evcxr, Config};
 let config = Config { verbose: false, ..Default::default() };
 execute_evcxr(r#"
 :dep nalgebra = "0.31.0"
-:dep nalgebra_latex = { version = "0.1.5", features = ["lin_sys", "evcxr"] }
+:dep nalgebra_latex = { version = "0.1.6", features = ["lin_sys", "evcxr"] }
  
 use nalgebra::{matrix, Const};
 use nalgebra_latex::{
@@ -72,7 +72,7 @@ fn main() {
     let config = Config { ..Config::default() };
     execute_evcxr(r#"
 :dep nalgebra = "0.31.0"
-:dep nalgebra_latex = { version = "0.1.5", features = ["lin_sys", "evcxr"] }
+:dep nalgebra_latex = { version = "0.1.6", features = ["lin_sys", "evcxr"] }
 
 use nalgebra::{matrix, Const};
 use nalgebra_latex::{

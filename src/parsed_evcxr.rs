@@ -58,9 +58,17 @@ impl<'a> ParsedEvcxr<'a> {
     }
 
     pub(crate) fn execute_via_binary_crate(&self, config: &Config) -> std::io::Result<()> {
+        let epoch_time = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?
+            .as_millis();
+        // The same script can be run in different doc tests simultaneously, so we need to make sure
+        // that the binary crate is unique for each doc test because the author doesn't know how to
+        // synchronize the execution of the script in different doc tests.
         let binary_crate_root = std::env::temp_dir()
             .join("execute_evcxr")
-            .join(self.hash.to_string());
+            .join(self.hash.to_string())
+            .join(epoch_time.to_string());
         let binary_crate = self.create_binary_crate(&binary_crate_root, config)?;
 
         let mut cmd = std::process::Command::new("cargo");
